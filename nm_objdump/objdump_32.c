@@ -34,7 +34,7 @@ static const char *get_format_32(uint16_t machine, unsigned char data)
  * @shnum: number of section headers
  * @str_table: string table
  * @need_swap: endian swap flag
- * @elf_type: ELF file type (ET_REL, ET_EXEC, ET_DYN)
+ * @elf_type: ELF file type
  */
 static void print_sections_32(void *map, Elf32_Shdr *shdr, uint16_t shnum,
 			      char *str_table, int need_swap, uint16_t elf_type)
@@ -54,12 +54,13 @@ static void print_sections_32(void *map, Elf32_Shdr *shdr, uint16_t shnum,
 
 		if (s_size == 0 || s_type == SHT_NOBITS)
 			continue;
+		if (elf_type == ET_REL &&
+		    (s_type == SHT_RELA || s_type == SHT_REL))
+			continue;
 
 		name = str_table + s_name;
-		if (!strcmp(name, ".shstrtab"))
-			continue;
-		if (elf_type != ET_REL &&
-		    (!strcmp(name, ".symtab") || !strcmp(name, ".strtab")))
+		if (!strcmp(name, ".shstrtab") || !strcmp(name, ".symtab") ||
+		    !strcmp(name, ".strtab"))
 			continue;
 
 		printf("Contents of section %s:\n", name);
@@ -68,33 +69,19 @@ static void print_sections_32(void *map, Elf32_Shdr *shdr, uint16_t shnum,
 }
 
 /**
- * print_objdump_32 - process and print 32-bit ELF sections
- * @filename: file name
- * @map: memory map
- * @size: file size
+ * get_flags_32 - calculate BFD flags
+ * @ehdr: ELF header
+ * @shdr: section headers
+ * @shnum: number of sections
  * @need_swap: endian swap flag
+ * Return: BFD flags
  */
-void print_objdump_32(const char *filename, void *map,
-		      size_t size, int need_swap)
+static uint32_t get_flags_32(Elf32_Ehdr *ehdr, Elf32_Shdr *shdr,
+			     uint16_t shnum, int need_swap)
 {
-	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)map;
-	Elf32_Shdr *shdr, *strtab;
-	char *str_table;
 	uint32_t flags = BFD_NO_FLAGS;
 	uint16_t type = need_swap ? swap_16(ehdr->e_type) : ehdr->e_type;
-	uint16_t mach = need_swap ? swap_16(ehdr->e_machine) : ehdr->e_machine;
-	uint16_t shnum = need_swap ? swap_16(ehdr->e_shnum) : ehdr->e_shnum;
-	uint32_t shoff = need_swap ? swap_32(ehdr->e_shoff) : ehdr->e_shoff;
-	uint16_t shstrndx = need_swap ?
-		swap_16(ehdr->e_shstrndx) : ehdr->e_shstrndx;
-	uint32_t entry = need_swap ? swap_32(ehdr->e_entry) : ehdr->e_entry;
 	uint16_t i;
-
-	(void)size;
-	shdr = (Elf32_Shdr *)((char *)map + shoff);
-	strtab = &shdr[shstrndx];
-	str_table = (char *)map + (need_swap ? swap_32(strtab->sh_offset) :
-				   strtab->sh_offset);
 
 	if (type == ET_EXEC)
 		flags |= (EXEC_P | D_PAGED);
@@ -111,6 +98,38 @@ void print_objdump_32(const char *filename, void *map,
 		if (sh_type == SHT_SYMTAB || sh_type == SHT_DYNSYM)
 			flags |= HAS_SYMS;
 	}
+	return (flags);
+}
+
+/**
+ * print_objdump_32 - process and print 32-bit ELF sections
+ * @filename: file name
+ * @map: memory map
+ * @size: file size
+ * @need_swap: endian swap flag
+ */
+void print_objdump_32(const char *filename, void *map,
+		      size_t size, int need_swap)
+{
+	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)map;
+	Elf32_Shdr *shdr, *strtab;
+	char *str_table;
+	uint32_t flags = BFD_NO_FLAGS;
+	uint16_t mach = need_swap ? swap_16(ehdr->e_machine) : ehdr->e_machine;
+	uint16_t type = need_swap ? swap_16(ehdr->e_type) : ehdr->e_type;
+	uint16_t shnum = need_swap ? swap_16(ehdr->e_shnum) : ehdr->e_shnum;
+	uint32_t shoff = need_swap ? swap_32(ehdr->e_shoff) : ehdr->e_shoff;
+	uint16_t shstrndx = need_swap ?
+		swap_16(ehdr->e_shstrndx) : ehdr->e_shstrndx;
+	uint32_t entry = need_swap ? swap_32(ehdr->e_entry) : ehdr->e_entry;
+
+	(void)size;
+	shdr = (Elf32_Shdr *)((char *)map + shoff);
+	strtab = &shdr[shstrndx];
+	str_table = (char *)map + (need_swap ? swap_32(strtab->sh_offset) :
+				   strtab->sh_offset);
+
+	flags = get_flags_32(ehdr, shdr, shnum, need_swap);
 
 	printf("\n%s:     file format %s\n", filename,
 	       get_format_32(mach, ehdr->e_ident[EI_DATA]));
