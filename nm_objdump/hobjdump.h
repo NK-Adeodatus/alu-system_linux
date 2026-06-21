@@ -32,9 +32,11 @@ void print_flags(uint32_t flags);
 void print_hexdump(const unsigned char *data, uint64_t size, uint64_t vma);
 
 /* objdump_64.c */
-void print_objdump_64(const char *filename, void *map, size_t size, int need_swap);
+void print_objdump_64(const char *filename, void *map,
+		      size_t size, int need_swap);
 
 /* objdump_32.c */
-void print_objdump_32(const char *filename, void *map, size_t size, int need_swap);
+void print_objdump_32(const char *filename, void *map,
+		      size_t size, int need_swap);
 
 #endif /* HOBJDUMP_H */
