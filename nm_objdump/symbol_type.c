@@ -32,6 +32,9 @@ static char get_type_general(uint8_t bind, uint8_t type, uint16_t shndx,
 			c = 'B';
 		else if (sh_flags & SHF_EXECINSTR)
 			c = 'T';
+		else if (sh_type == SHT_INIT_ARRAY || sh_type == SHT_FINI_ARRAY ||
+			 sh_type == SHT_PREINIT_ARRAY)
+			c = 'T';
 		else if ((sh_flags & SHF_ALLOC) && !(sh_flags & SHF_WRITE))
 			c = 'R';
 		else if (sh_flags & SHF_WRITE)

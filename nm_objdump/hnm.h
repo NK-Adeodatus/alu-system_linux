@@ -11,13 +11,15 @@
 #include <string.h>
 
 /* main.c */
-int process_file(const char *filename);
+int process_file(const char *prog_name, const char *filename);
 
 /* nm_64.c */
-void parse_64(const char *filename, void *map, size_t size, int need_swap);
+void parse_64(const char *prog_name, const char *filename, void *map,
+	      size_t size, int need_swap);
 
 /* nm_32.c */
-void parse_32(const char *filename, void *map, size_t size, int need_swap);
+void parse_32(const char *prog_name, const char *filename, void *map,
+	      size_t size, int need_swap);
 
 /* symbol_type.c */
 char get_type_64(Elf64_Sym *sym, Elf64_Shdr *shdr);
