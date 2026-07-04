@@ -26,7 +26,7 @@ void print_syscall(pid_t child)
 	struct user_regs_struct regs;
 
 	if (ptrace(PTRACE_GETREGS, child, NULL, &regs) != -1)
-		printf("%llu\n", regs.orig_rax);
+		printf("%lu\n", (unsigned long)regs.orig_rax);
 }
 
 /**
