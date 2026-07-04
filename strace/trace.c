@@ -39,7 +39,11 @@ void parent_trace(pid_t child)
 	int status;
 	int entering = 1;
 
-	waitpid(child, &status, 0);
+	if (waitpid(child, &status, 0) == -1)
+		return;
+
+	if (WIFSTOPPED(status))
+		print_syscall(child);
 
 	while (WIFSTOPPED(status))
 	{
