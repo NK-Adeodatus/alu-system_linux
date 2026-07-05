@@ -14,5 +14,6 @@ extern char **environ;
 void child_exec(char **argv);
 void parent_trace(pid_t child);
 void parent_trace_name(pid_t child);
+void parent_trace_retval(pid_t child);
 
 #endif /* STRACE_H */
