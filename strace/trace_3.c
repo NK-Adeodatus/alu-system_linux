@@ -27,6 +27,7 @@ void print_enter(syscall_t const *entry, struct user_regs_struct const *regs)
 {
 	unsigned long args[6];
 	size_t i;
+	size_t n;
 
 	args[0] = regs->rdi;
 	args[1] = regs->rsi;
@@ -35,8 +36,12 @@ void print_enter(syscall_t const *entry, struct user_regs_struct const *regs)
 	args[4] = regs->r8;
 	args[5] = regs->r9;
 
+	n = entry->nb_params;
+	if (n == 1 && entry->params[0] == VOID)
+		n = 0;
+
 	printf("%s(", entry->name);
-	for (i = 0; i < entry->nb_params; i++)
+	for (i = 0; i < n; i++)
 	{
 		if (i > 0)
 			printf(", ");
