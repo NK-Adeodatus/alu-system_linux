@@ -2,6 +2,25 @@
 #include <stdlib.h>
 
 /**
+ * add_factor - dynamically allocates and adds a factor to the list
+ * @list: pointer to the list
+ * @n: factor to add
+ *
+ * Return: 1 on success, 0 on failure
+ */
+static int add_factor(list_t *list, unsigned long n)
+{
+	unsigned long *factor;
+
+	factor = malloc(sizeof(*factor));
+	if (!factor)
+		return (0);
+	*factor = n;
+	list_add(list, factor);
+	return (1);
+}
+
+/**
  * prime_factors - factorizes a number into a list of prime factors
  * @s: string representation of the number to factorize
  *
@@ -9,7 +28,7 @@
  */
 list_t *prime_factors(char const *s)
 {
-	unsigned long n, i, *factor;
+	unsigned long n, i;
 	list_t *list;
 
 	if (!s)
@@ -17,18 +36,13 @@ list_t *prime_factors(char const *s)
 
 	n = strtoul(s, NULL, 10);
 	list = calloc(1, sizeof(*list));
-	if (!list)
-		return (NULL);
-	if (n < 2)
+	if (!list || n < 2)
 		return (list);
 
 	while (n % 2 == 0)
 	{
-		factor = malloc(sizeof(*factor));
-		if (!factor)
+		if (!add_factor(list, 2))
 			return (NULL);
-		*factor = 2;
-		list_add(list, factor);
 		n /= 2;
 	}
 
@@ -36,23 +50,14 @@ list_t *prime_factors(char const *s)
 	{
 		while (n % i == 0)
 		{
-			factor = malloc(sizeof(*factor));
-			if (!factor)
+			if (!add_factor(list, i))
 				return (NULL);
-			*factor = i;
-			list_add(list, factor);
 			n /= i;
 		}
 	}
 
-	if (n > 2)
-	{
-		factor = malloc(sizeof(*factor));
-		if (!factor)
-			return (NULL);
-		*factor = n;
-		list_add(list, factor);
-	}
+	if (n > 2 && !add_factor(list, n))
+		return (NULL);
 
 	return (list);
 }
