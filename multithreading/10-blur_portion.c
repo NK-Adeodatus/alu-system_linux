@@ -1,30 +1,6 @@
 #include "multithreading.h"
 
 /**
- * get_pixel - retrieves a pixel from an image, clamping out-of-bounds
- * coordinates to the nearest edge pixel
- *
- * @img: image to read the pixel from
- * @x:   x coordinate of the pixel, may be negative or out of bounds
- * @y:   y coordinate of the pixel, may be negative or out of bounds
- *
- * Return: the pixel located at the (clamped) coordinates
- */
-static pixel_t get_pixel(img_t const *img, long int x, long int y)
-{
-	if (x < 0)
-		x = 0;
-	if (y < 0)
-		y = 0;
-	if ((size_t)x >= img->w)
-		x = (long int)img->w - 1;
-	if ((size_t)y >= img->h)
-		y = (long int)img->h - 1;
-
-	return (img->pixels[(y * (long int)img->w) + x]);
-}
-
-/**
  * blur_pixel - computes the blurred value of a single pixel by
  * applying a convolution kernel centered on that pixel
  *
@@ -40,19 +16,26 @@ static pixel_t blur_pixel(img_t const *img, kernel_t const *kernel,
 {
 	float sum_r = 0, sum_g = 0, sum_b = 0, sum_k = 0, weight;
 	long int half = (long int)kernel->size / 2, i, j;
+	long int px, py;
 	pixel_t p, result;
 
 	for (i = 0; i < (long int)kernel->size; i++)
 	{
 		for (j = 0; j < (long int)kernel->size; j++)
 		{
-			weight = kernel->matrix[i][j];
-			p = get_pixel(img, (long int)x + j - half,
-				(long int)y + i - half);
-			sum_r += p.r * weight;
-			sum_g += p.g * weight;
-			sum_b += p.b * weight;
-			sum_k += weight;
+			px = (long int)x + j - half;
+			py = (long int)y + i - half;
+
+			if (px >= 0 && px < (long int)img->w &&
+			    py >= 0 && py < (long int)img->h)
+			{
+				weight = kernel->matrix[i][j];
+				p = img->pixels[(py * img->w) + px];
+				sum_r += p.r * weight;
+				sum_g += p.g * weight;
+				sum_b += p.b * weight;
+				sum_k += weight;
+			}
 		}
 	}
 	if (sum_k == 0)
