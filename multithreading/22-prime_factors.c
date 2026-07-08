@@ -32,11 +32,15 @@ task_t *create_task(task_entry_t entry, void *param)
  */
 void destroy_task(task_t *task)
 {
-	if (task)
+	if (!task)
+		return;
+	pthread_mutex_destroy(&task->lock);
+	if (task->result)
 	{
-		pthread_mutex_destroy(&task->lock);
-		free(task);
+		list_destroy((list_t *)task->result, free);
+		free(task->result);
 	}
+	free(task);
 }
 
 /**
