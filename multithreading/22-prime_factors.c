@@ -35,11 +35,6 @@ void destroy_task(task_t *task)
 	if (task)
 	{
 		pthread_mutex_destroy(&task->lock);
-		if (task->result)
-		{
-			list_destroy((list_t *)task->result, free);
-			free(task->result);
-		}
 		free(task);
 	}
 }
