@@ -92,3 +92,33 @@ int accept_connection(int sockfd)
 
 	return (client_fd);
 }
+
+/**
+ * accept_connection_with_ip - Accepts one incoming connection and
+ * copies its IP address into a caller-provided buffer, without
+ * printing anything
+ * @sockfd: The listening socket file descriptor
+ * @ip_str: Buffer to store the client's IP address in
+ * @size: Size of the ip_str buffer
+ *
+ * Return: The connected client's socket file descriptor
+ */
+int accept_connection_with_ip(int sockfd, char *ip_str, size_t size)
+{
+	struct sockaddr_in client_addr;
+	socklen_t addr_len;
+	int client_fd;
+
+	addr_len = sizeof(client_addr);
+	client_fd = accept(sockfd, (struct sockaddr *)&client_addr, &addr_len);
+	if (client_fd == -1)
+	{
+		perror("accept");
+		close(sockfd);
+		exit(EXIT_FAILURE);
+	}
+
+	inet_ntop(AF_INET, &client_addr.sin_addr, ip_str, (socklen_t)size);
+
+	return (client_fd);
+}
