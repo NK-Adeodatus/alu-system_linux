@@ -59,3 +59,69 @@ char *todo_to_json(const todo_t *todo)
 
 	return (json);
 }
+
+/**
+ * todo_list_to_json - Builds the JSON array representation of every
+ * todo currently in the in-memory list
+ *
+ * Return: A newly allocated JSON string (must be freed by the
+ * caller), or NULL on failure. Returns "[]" if the list is empty
+ */
+char *todo_list_to_json(void)
+{
+	todo_t *cur;
+	char **parts;
+	size_t count, i, total, len;
+	char *result, *pos;
+
+	count = 0;
+	for (cur = head; cur != NULL; cur = cur->next)
+		count++;
+
+	if (count == 0)
+	{
+		result = malloc(3);
+		if (result != NULL)
+			strcpy(result, "[]");
+		return (result);
+	}
+
+	parts = malloc(count * sizeof(*parts));
+	if (parts == NULL)
+		return (NULL);
+
+	total = 2 + (count - 1);
+	i = 0;
+	for (cur = head; cur != NULL; cur = cur->next)
+	{
+		parts[i] = todo_to_json(cur);
+		total += strlen(parts[i]);
+		i++;
+	}
+
+	result = malloc(total + 1);
+	if (result == NULL)
+	{
+		for (i = 0; i < count; i++)
+			free(parts[i]);
+		free(parts);
+		return (NULL);
+	}
+
+	pos = result;
+	*pos++ = '[';
+	for (i = 0; i < count; i++)
+	{
+		len = strlen(parts[i]);
+		memcpy(pos, parts[i], len);
+		pos += len;
+		if (i < count - 1)
+			*pos++ = ',';
+		free(parts[i]);
+	}
+	*pos++ = ']';
+	*pos = '\0';
+
+	free(parts);
+	return (result);
+}
