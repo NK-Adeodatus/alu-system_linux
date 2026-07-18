@@ -18,5 +18,6 @@ typedef struct todo_s
 
 todo_t *todo_create(const char *title, const char *description);
 char *todo_to_json(const todo_t *todo);
+char *todo_list_to_json(void);
 
 #endif /* TODO_STORE_H */
