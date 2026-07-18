@@ -8,10 +8,12 @@ TODO_API_2_SRC = todo_api_2.c socket_utils.c http_request.c http_response.c \
 		  header_parser.c
 TODO_API_3_SRC = todo_api_3.c socket_utils.c http_request.c http_response.c \
 		  body_parser.c
+TODO_API_4_SRC = todo_api_4.c socket_utils.c http_request.c http_response.c \
+		  request_parser.c todo_store.c
 
 .PHONY: all clean
 
-all: todo_api_0 todo_api_1 todo_api_2 todo_api_3
+all: todo_api_0 todo_api_1 todo_api_2 todo_api_3 todo_api_4
 
 todo_api_0: $(TODO_API_0_SRC)
 	$(CC) $(CFLAGS) -o $@ $(TODO_API_0_SRC)
@@ -25,5 +27,8 @@ todo_api_2: $(TODO_API_2_SRC)
 todo_api_3: $(TODO_API_3_SRC)
 	$(CC) $(CFLAGS) -o $@ $(TODO_API_3_SRC)
 
+todo_api_4: $(TODO_API_4_SRC)
+	$(CC) $(CFLAGS) -o $@ $(TODO_API_4_SRC)
+
 clean:
-	rm -f todo_api_0 todo_api_1 todo_api_2 todo_api_3
+	rm -f todo_api_0 todo_api_1 todo_api_2 todo_api_3 todo_api_4
