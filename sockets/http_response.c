@@ -53,9 +53,10 @@ void send_json_response(int client_fd, int status_code,
 	json_len = strlen(json);
 	header_len = snprintf(header, sizeof(header),
 			       "HTTP/1.1 %d %s\r\n"
-			       "Content-Length: %zu\r\n"
+			       "Content-Length: %lu\r\n"
 			       "Content-Type: application/json\r\n\r\n",
-			       status_code, status_text, json_len);
+			       status_code, status_text,
+			       (unsigned long)json_len);
 
 	if (send(client_fd, header, (size_t)header_len, 0) == -1)
 	{
